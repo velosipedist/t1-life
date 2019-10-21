@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Life is just</title>
+    <link rel="stylesheet" href="/css/index.css">
+    <script src="/js/socket.io.slim.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/jquery.min.js"></script>
+</head>
+<body>
+<div id="life">
+</div>
+<div id="controls">
+    <button id="static-btn">Static ring</button>
+    <button id="oscillator-btn">Oscillator</button>
+    <button id="glider-btn">Glider</button>
+    <button id="reset-btn">Reset</button>
+    <br>
+    <input type="checkbox" id="debug-check"/>
+    <label for="debug-check">Debug</label>
+</div>
+<div class="players-panel">
+    <div id="players"></div>
+</div>
+<script src="/js/main.js"></script>
+</body>
+</html>

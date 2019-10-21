@@ -1,0 +1,17 @@
+{
+  "name": "t1-life",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:velosipedist/t1-life.git",
+  "author": "Nick Konev <nick@konev.pro>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "express": "^4.17.1",
+    "lodash": "^4.17.15",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  }
+}
