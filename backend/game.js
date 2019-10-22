@@ -8,11 +8,15 @@ const FRAMERATE = 1000;
 
 let $tick;
 
+function sendUpdate(io, state) {
+    io.emit('update', {state});
+}
+
 exports.start = (io, socket, state) => {
     // new player joined
     socket.on('join', ({color}) => {
         state.players.push(color);
-        io.emit('update', {state});
+        sendUpdate(io, state);
     });
 
     // reset is clicked
@@ -26,11 +30,14 @@ exports.start = (io, socket, state) => {
     // some player clicked the cell or drawn predefined pattern
     socket.on('click', ({cells, color}) => {
         for (let [x, y] of cells) {
-            state.matrix[y][x].color = color;
-            state.matrix[y][x].live = true;
-            state.matrix[y][x].neighbours = getNeighboursCoords(state.matrix, x, y);
+            state.matrix[y][x] = {
+                ...state.matrix[y][x],
+                color,
+                live: true,
+                neighbours: getNeighboursCoords(state.matrix, x, y)
+            };
         }
-        io.emit('update', {state});
+        sendUpdate(io, state);
     });
 
     if ($tick !== undefined) {
@@ -39,7 +46,7 @@ exports.start = (io, socket, state) => {
     $tick = setInterval(
         () => {
             state.matrix = nextStep(state.matrix);
-            io.emit('update', {state});
+            sendUpdate(io, state);
         },
         FRAMERATE
     );
@@ -107,7 +114,8 @@ function averageColor(neighbours, matrix) {
         // collect RGB sets
         .reduce((components, n) => {
             // split for RGB int components from hex string
-            const rgb = _.chunk(n.color.substr(1, 6), 2)
+            let hexColorValue = n.color.substr(1, 6);
+            const rgb = _.chunk(hexColorValue, 2)
                 .map(hex => {
                     return parseInt(hex.join(''), 16);
                 })
@@ -141,11 +149,13 @@ function getNeighboursCoords(matrix, x, y) {
 
     let liveNeighbours = cellsInRange
         .filter(coords => {
-            const [_x, _y] = coords;
-            return (matrix[_y] != undefined) &&
-                (matrix[_y][_x] != undefined) &&
-                !_.isEqual([x, y], [_x, _y]) &&
-                matrix[_y][_x].live;
+            const [cellX, cellY] = coords;
+            const cellState = _.get(matrix, [cellY, cellX]);
+            return (
+                cellState != undefined
+                && !_.isEqual([x, y], coords)
+                && cellState.live
+            );
         });
 
     return liveNeighbours;

@@ -3,7 +3,7 @@ const app = express();
 const socket = require('socket.io');
 const port = process.env.PORT || 3333;
 
-let game = require("./game.js");
+let game = require("./backend/game");
 
 app.use(express.static('public'));
 
