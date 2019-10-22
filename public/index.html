@@ -23,6 +23,19 @@
         <div id="players" class="players-panel"></div>
     </div>
 </div>
+<div class="note">
+    <p>Welcome to Game Of Life Multiplayer!</p>
+    <p>Click on cells to make them alive and paint them with the color assigned to you (highlighted user icon is you).</p>
+
+    <p>Game flows following these rules:</p>
+    <ol>
+        <li>Any live cell with fewer than two live neighbors dies, as if caused by under-population.</li>
+        <li>Any live cell with two or three live neighbors lives on to the next generation.</li>
+        <li>Any live cell with more than three live neighbors dies, as if by overcrowding.</li>
+        <li>Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.</li>
+        <li>When a dead cell revives by rule #4, it will be given a color that is the average of its neighbors (that revive it).</li>
+    </ol>
+</div>
 
 <script src="/js/main.js"></script>
 </body>

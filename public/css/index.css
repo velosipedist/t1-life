@@ -97,3 +97,22 @@ button.glyph {
 .players-panel .player.me {
     box-shadow: hsl(188, 93%, 51%) 0 0 4px 1px;
 }
+.note{
+    margin: 20px 0;
+    width: 540px;
+    border-radius: 20px;
+    background-color: #eee9c3;
+    color: #4a473b;
+    padding: 20px 30px 25px;
+    font: 13px/125% "Pt Serif", "Times New Roman", Times, serif;
+    clear: both;
+    box-sizing: border-box;
+}
+ul,ol{
+    padding: 0;
+    margin: 0;
+}
+li{
+    margin: 0;
+    padding: 0 0 10px;
+}
