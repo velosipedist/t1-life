@@ -12,6 +12,10 @@
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
+    "jest": "^24.9.0",
     "nodemon": "^1.19.4"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }

@@ -1,5 +1,5 @@
 body {
-    background-color: #51604a;
+    background-color: hsl(0, 0%, 100%);
 }
 
 #life {
@@ -10,6 +10,7 @@ body {
     width: 400px;
     height: 400px;
     background: #333333;
+    margin-bottom: 20px;
 }
 
 .cell {
@@ -23,6 +24,12 @@ body {
     vertical-align: middle;
     line-height: 20px;
     color: #ff8800;
+    transition: background-color, 700ms;
+}
+
+.cell:hover {
+    background-color: #bbb !important;
+    transition: background-color, 100ms;
 }
 
 .cell.live {
@@ -30,13 +37,14 @@ body {
 }
 
 .cell.dead {
-    background: #555;
+    background: #3f3f3f;
 }
 
 #controls {
     float: left;
     width: 100px;
     margin-left: 20px;
+    padding: 10px;
 }
 
 label[for] {
@@ -68,16 +76,24 @@ button.glyph {
     float: none;
     clear: both;
     margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: start;
 }
 
 .players-panel .player {
     display: inline-block;
-    width: 40px;
-    height: 40px;
-    margin-right: 15px;
-    content: "☺︎";
+    width: 45px;
+    height: 45px;
     color: #ffffff;
     text-align: center;
-    font-size: 15px;
+    font-size: 30px;
     font-family: Arial;
+    margin-bottom: 10px;
+
+}
+
+.players-panel .player.me {
+    box-shadow: hsl(188, 93%, 51%) 0 0 4px 1px;
 }

@@ -1,5 +1,6 @@
 const $socket = io();
 const $field = $('#life');
+const $players = $('#players');
 
 class Cell {
     live = false;
@@ -21,7 +22,13 @@ class Cell {
     }
 }
 
-const redraw = matrix => {
+const redraw = ({matrix, players}) => {
+    $players.empty();
+    players.forEach(clr => $players.append(
+        $(`<div class="player ${clr === $myColor ? 'me':''}">☺︎</div>`)
+            .css({backgroundColor: clr})
+    ));
+
     $field.empty();
     const debug = $('#debug-check').prop('checked');
 
@@ -80,7 +87,8 @@ $('#static-btn').on('click', () => {
     );
 });
 $('#reset-btn').on('click', () => {
-    $socket.emit('reset');
+    $socket.emit('reset', {sender: $myColor});
+    $socket.emit('join', {color: $myColor});
 });
 
 function drawFigure(...rows) {
@@ -103,15 +111,26 @@ function drawFigure(...rows) {
 }
 
 function generateNewColor() {
+    let ranges = _.shuffle([
+        [80,160],
+        [100,250],
+        [20,80],
+    ]);
     return ['R', 'G', 'B'].reduce(
-        (rgb) => rgb + _.random(90, 220).toString(16),
+        (rgb, $1, i) => rgb + _.random(...ranges[i]).toString(16),
         '#'
     );
 }
 
 // bootstrap app
 let $myColor = generateNewColor();
-document.body.style.backgroundColor = $myColor;
+document.getElementById('controls').style.border = `1px solid ${$myColor}`;
+$socket.emit('join', {color: $myColor});
+
+$socket.on('reset', () => {
+    $myColor = generateNewColor();
+    $socket.emit('join', {color: $myColor});
+});
 $socket.on('update', ({state}) => {
-    redraw(state.matrix);
+    redraw(state);
 });

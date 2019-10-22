@@ -9,8 +9,14 @@ const FRAMERATE = 2000;
 let tick;
 
 exports.start = (io, socket, state) => {
+    socket.on('join', ({color}) => {
+        state.players.push(color);
+        io.emit('update', {state});
+    });
     socket.on('reset', () => {
-        state.matrix = buildEmptyMatrix()
+        state.matrix = buildEmptyMatrix();
+        state.players = [];
+        socket.broadcast.emit('reset');
     });
     socket.on('click', ({cells, color}) => {
         for (let [x, y] of cells) {
@@ -34,7 +40,7 @@ exports.start = (io, socket, state) => {
 };
 
 exports.initState = () => {
-    return {matrix: buildEmptyMatrix()};
+    return {matrix: buildEmptyMatrix(), players: []};
 };
 
 function buildEmptyMatrix() {
@@ -42,7 +48,7 @@ function buildEmptyMatrix() {
     for (let [x, y] of walkMatrix()) {
         matrix[x] || matrix.push([]);
         let xRow = matrix[x];
-        xRow.push({live: false, color: "#FFFFFF", neighbours: []});
+        xRow.push({live: false, color: '#666666', neighbours: []});
     }
     return matrix;
 }
@@ -58,25 +64,7 @@ function* walkMatrix() {
     }
 }
 
-function averageColor(neighbours) {
-    const colorsAround = neighbours
-        .filter(n => n.live)
-        .reduce((components, n) => {
-            const rgb = _.chunk(n.color.substr(1, 6), 2)
-                .map(hex => {
-                    return parseInt(hex.join(''), 16);
-                })
-            ;
-            return components.concat([rgb]);
-        }, []);
-    return _.zip(colorsAround)
-        .map(_.mean)
-        .map(c => Number(c).toString(16)
-        ).join('');
-}
-
 function nextStep(matrixPrev) {
-    // console.table(stateMatrixPrev.map(c => c.map( c2 => `${c2.color}` )));
     let matrixNew = buildEmptyMatrix();
 
     for (let [x, y] of walkMatrix()) {
@@ -93,36 +81,61 @@ function nextStep(matrixPrev) {
             // produce new live cell with average color
             if (neighbours.length == 3) {
                 newCell.live = true;
-                newCell.color = `#${(averageColor(neighbours))}`;
+                // newCell.color = matrixPrev[neighbours[0][1]][neighbours[0][0]].color;
+                newCell.color = `#${(averageColor(neighbours, matrixPrev))}`;
             }
         }
     }
     return matrixNew;
 }
 
+function averageColor(neighbours, matrix) {
+    const colorsAround = neighbours
+        .map(pair => {
+            const [x, y] = pair;
+            return matrix[y][x];
+        })
+        .filter(n => n.live)
+        .reduce((components, n) => {
+            const rgb = _.chunk(n.color.substr(1, 6), 2)
+                .map(hex => {
+                    return parseInt(hex.join(''), 16);
+                })
+            ;
+            components.push(rgb);
+            return components;
+        }, []);
+    let c = _.zip(...colorsAround)
+        .map(_.mean)
+        .map(c => Number(Math.round(c)).toString(16))
+        .join('');
+    return c;
+}
+
 function getNeighbours(matrix, x, y) {
     const
-        xCoords = [x - 1, x, x + 1],
-        yCoords = [y - 1, y, y + 1]
+        xRange = [x - 1, x, x + 1],
+        yRange = [y - 1, y, y + 1]
     ;
 
-    return yCoords
+    let liveCells = yRange
         .reduce((all, _y) => {
-            for (let _x of xCoords) {
+            for (let _x of xRange) {
                 all.push([_x, _y]);
             }
             return all;
-        }, [])
+        }, []);
+
+    let b = liveCells
         .filter(pair => {
             const [_x, _y] = pair;
             return (matrix[_y] != undefined) &&
                 (matrix[_y][_x] != undefined) &&
                 !_.isEqual([x, y], [_x, _y]) &&
                 matrix[_y][_x].live;
-        }).map(pair => {
-            const [_x, _y] = pair;
-            return matrix[_y][_x];
-        })
+        });
+    return b
 }
 
-
+exports.averageColor = averageColor;
+exports.getNeighbours = getNeighbours;
