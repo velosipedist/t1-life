@@ -4,33 +4,39 @@ var exports = module.exports = {};
 
 const WIDTH = 20;
 const HEIGHT = 20;
-const FRAMERATE = 2000;
+const FRAMERATE = 1000;
 
-let tick;
+let $tick;
 
 exports.start = (io, socket, state) => {
+    // new player joined
     socket.on('join', ({color}) => {
         state.players.push(color);
         io.emit('update', {state});
     });
+
+    // reset is clicked
     socket.on('reset', () => {
         state.matrix = buildEmptyMatrix();
         state.players = [];
+        // acknowledging everyone else
         socket.broadcast.emit('reset');
     });
+
+    // some player clicked the cell or drawn predefined pattern
     socket.on('click', ({cells, color}) => {
         for (let [x, y] of cells) {
             state.matrix[y][x].color = color;
             state.matrix[y][x].live = true;
-            state.matrix[y][x].neighbours = getNeighbours(state.matrix, x, y);
+            state.matrix[y][x].neighbours = getNeighboursCoords(state.matrix, x, y);
         }
         io.emit('update', {state});
     });
 
-    if (tick !== undefined) {
+    if ($tick !== undefined) {
         return;
     }
-    tick = setInterval(
+    $tick = setInterval(
         () => {
             state.matrix = nextStep(state.matrix);
             io.emit('update', {state});
@@ -68,7 +74,7 @@ function nextStep(matrixPrev) {
     let matrixNew = buildEmptyMatrix();
 
     for (let [x, y] of walkMatrix()) {
-        let neighbours = getNeighbours(matrixPrev, x, y),
+        let neighbours = getNeighboursCoords(matrixPrev, x, y),
             newCell = matrixNew[y][x],
             prevCell = matrixPrev[y][x]
         ;
@@ -81,22 +87,26 @@ function nextStep(matrixPrev) {
             // produce new live cell with average color
             if (neighbours.length == 3) {
                 newCell.live = true;
-                // newCell.color = matrixPrev[neighbours[0][1]][neighbours[0][0]].color;
-                newCell.color = `#${(averageColor(neighbours, matrixPrev))}`;
+                newCell.color = averageColor(neighbours, matrixPrev);
             }
         }
     }
+
     return matrixNew;
 }
 
 function averageColor(neighbours, matrix) {
     const colorsAround = neighbours
+        // pick cell states from matrix
         .map(pair => {
             const [x, y] = pair;
             return matrix[y][x];
         })
+        // only live cells
         .filter(n => n.live)
+        // collect RGB sets
         .reduce((components, n) => {
+            // split for RGB int components from hex string
             const rgb = _.chunk(n.color.substr(1, 6), 2)
                 .map(hex => {
                     return parseInt(hex.join(''), 16);
@@ -105,20 +115,23 @@ function averageColor(neighbours, matrix) {
             components.push(rgb);
             return components;
         }, []);
-    let c = _.zip(...colorsAround)
+
+    // back to HEX
+    let colorAveraged = _.zip(...colorsAround)
         .map(_.mean)
         .map(c => Number(Math.round(c)).toString(16))
         .join('');
-    return c;
+
+    return '#' + colorAveraged;
 }
 
-function getNeighbours(matrix, x, y) {
+function getNeighboursCoords(matrix, x, y) {
     const
         xRange = [x - 1, x, x + 1],
         yRange = [y - 1, y, y + 1]
     ;
 
-    let liveCells = yRange
+    let cellsInRange = yRange
         .reduce((all, _y) => {
             for (let _x of xRange) {
                 all.push([_x, _y]);
@@ -126,16 +139,17 @@ function getNeighbours(matrix, x, y) {
             return all;
         }, []);
 
-    let b = liveCells
-        .filter(pair => {
-            const [_x, _y] = pair;
+    let liveNeighbours = cellsInRange
+        .filter(coords => {
+            const [_x, _y] = coords;
             return (matrix[_y] != undefined) &&
                 (matrix[_y][_x] != undefined) &&
                 !_.isEqual([x, y], [_x, _y]) &&
                 matrix[_y][_x].live;
         });
-    return b
+
+    return liveNeighbours;
 }
 
 exports.averageColor = averageColor;
-exports.getNeighbours = getNeighbours;
+exports.getNeighboursCoords = getNeighboursCoords;

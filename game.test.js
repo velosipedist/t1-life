@@ -16,10 +16,13 @@ test("Calculates average color", () => {
         [0, 1],
         [1, 0],
     ], matrix);
-    expect(color).toBe('808080')
+
+    // in between of #FFFFFF & #000000
+    expect(color).toEqual('#808080')
 });
 
 test("Finds neighbours around", () => {
+    // sample field:
     // x x x
     // - - -
     // x x x
@@ -29,19 +32,25 @@ test("Finds neighbours around", () => {
         _.times(3, _.constant({live: true})),
     ];
 
-    expect(game.getNeighbours(matrix, 0, 0)).toEqual([
-        [1, 0]
-    ]);
+    expect(game.getNeighboursCoords(matrix, 0, 0))
+        .toEqual([
+            [1, 0]
+        ])
+    ;
 
-    expect(game.getNeighbours(matrix, 1, 0)).toEqual([
-        [0, 0],
-        [2, 0],
-    ]);
+    expect(game.getNeighboursCoords(matrix, 1, 0))
+        .toEqual([
+            [0, 0],
+            [2, 0],
+        ])
+    ;
 
-    expect(game.getNeighbours(matrix, 0, 1)).toEqual([
-        [0, 0],
-        [1, 0],
-        [0, 2],
-        [1, 2],
-    ]);
+    expect(game.getNeighboursCoords(matrix, 0, 1))
+        .toEqual([
+            [0, 0],
+            [1, 0],
+            [0, 2],
+            [1, 2],
+        ])
+    ;
 });

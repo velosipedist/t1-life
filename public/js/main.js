@@ -24,10 +24,12 @@ class Cell {
 
 const redraw = ({matrix, players}) => {
     $players.empty();
-    players.forEach(clr => $players.append(
-        $(`<div class="player ${clr === $myColor ? 'me':''}">☺︎</div>`)
-            .css({backgroundColor: clr})
-    ));
+    $players.append(
+        players.map(color =>
+            $(`<div class="player ${color === $myColor ? 'me' : ''}">☺︎</div>`)
+                .css({backgroundColor: color})
+        )
+    );
 
     $field.empty();
     const debug = $('#debug-check').prop('checked');
@@ -92,17 +94,17 @@ $('#reset-btn').on('click', () => {
 });
 
 function drawFigure(...rows) {
-    let dx = _.random(2, 17);
-    let dy = _.random(2, 17);
+    const dx = _.random(2, 15);
+    const dy = _.random(2, 15);
     const cells = rows
         .reduce(
-            (carry, line, y) => {
-                let drawPoints = line
+            (canvas, line, y) => {
+                let linePoints = line
                     .split('')
                     .map((c, x) => (c == 'x' ? [x + dx, y + dy] : false))
                     .filter(Boolean)
                 ;
-                return carry.concat(drawPoints);
+                return canvas.concat(linePoints);
             },
             []
         )
@@ -111,26 +113,28 @@ function drawFigure(...rows) {
 }
 
 function generateNewColor() {
-    let ranges = _.shuffle([
+    let rgbRanges = _.shuffle([
         [80,160],
         [100,250],
         [20,80],
     ]);
     return ['R', 'G', 'B'].reduce(
-        (rgb, $1, i) => rgb + _.random(...ranges[i]).toString(16),
+        (rgb, $1, i) => rgb + _.random(...rgbRanges[i]).toString(16),
         '#'
     );
 }
 
-// bootstrap app
+// bootstrap the app
 let $myColor = generateNewColor();
 document.getElementById('controls').style.border = `1px solid ${$myColor}`;
+
 $socket.emit('join', {color: $myColor});
 
 $socket.on('reset', () => {
     $myColor = generateNewColor();
     $socket.emit('join', {color: $myColor});
 });
+
 $socket.on('update', ({state}) => {
     redraw(state);
 });
