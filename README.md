@@ -13,6 +13,13 @@ Clone the repo
 Run the app
 
 `cd t1-life`
-`nodemon index.js`
+
+`yarn && yarn nodemon index.js`
+
+Open two tabs in your browser at http://localhost:3333/
+
+See the game panels:
+
+![Game screen](/docs/main_screen.jpg?raw=true "Game screen")
 
 

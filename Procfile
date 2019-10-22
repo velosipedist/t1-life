@@ -1,1 +1,1 @@
-web: yarn && yarn index.js
+web: yarn && node index.js
