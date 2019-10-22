@@ -16,7 +16,7 @@ Players can:
 
 ## Libraries used
 
-* Socket.IO – as a websocket layer to communicate between players
+* Socket.IO     – as a websocket layer to communicate between players
 * Express.js – for simplify static content sharing and I/O server creation
 * Lodash – improves code readability
 * jQuery – improves DOM manipulations readability
@@ -62,6 +62,7 @@ Run following:
 
 ```
 heroku create
+git push heroku master
 heroku ps:scale web=1
 heroku open
 ```
