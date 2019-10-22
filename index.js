@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const socket = require('socket.io');
-const port = process.env.APP_PORT || 3333;
+const port = process.env.PORT || 3333;
 
 let game = require("./game.js");
 
